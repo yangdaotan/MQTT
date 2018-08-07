@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <!--  <include resource="com/mobike/common/logging/logback-defaults.xml"/> -->
+
+
+    <springProperty scope="context" name="ci.environment.slug" source="ci.environment.slug"
+                    defaultValue="local"/>
+    <springProperty scope="context" name="spring.application.name" source="spring.application.name"/>
+    <springProperty scope="context" name="spring.application.instance" source="spring.application.instance"
+                    defaultValue="0"/>
+
+    <contextName>${spring.application.name}</contextName>
+
+    <property name="BASE_NAME"
+              value="${ci.environment.slug}-${spring.application.name}-${spring.application.instance}"
+              scope="context"/>
+
+    <appender name="ERROR-FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${BASE_NAME}.error</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${BASE_NAME}.%d{yyyy-MM-dd}.error</fileNamePattern>
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${BASE_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${BASE_NAME}.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name = "ASYNC" class= "ch.qos.logback.classic.AsyncAppender" >
+        <appender-ref ref="FILE" />
+    </appender>
+
+    <springProfile name="debug">
+        <logger name="com.mobike" level="DEBUG"/>
+    </springProfile>
+
+    <root level="info">
+        <springProfile name="debug">
+            <appender-ref ref="CONSOLE"/>
+        </springProfile>
+        <appender-ref ref="ERROR-FILE"/>
+        <appender-ref ref="ASYNC"/>
+    </root>
+</configuration>

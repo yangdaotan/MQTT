@@ -1,0 +1,25 @@
+
+spring:
+  application:
+    name: mqtt-mot
+    version: 1.0
+    instance: 0
+  profiles:
+    active: debug
+  cloud:
+    config:
+      enabled: true
+      uri: xxx
+      label: master
+    consul:
+     # host: xxx
+     # port: 8500
+      discovery:
+        instance-id: ${ci.environment.slug}-${spring.application.name}-${spring.application.instance}
+        tags: api
+logging:
+  path: ${app.home:${user.home}}/logs
+
+endpoints:
+  shutdown:
+    enabled: true
